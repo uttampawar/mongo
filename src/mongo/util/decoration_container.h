@@ -193,6 +193,7 @@ public:
 
 private:
     const DecorationRegistry<DecoratedType>* const _registry;
+    char padding[60];
     const std::unique_ptr<unsigned char[]> _decorationData;
 };
 

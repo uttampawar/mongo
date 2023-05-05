@@ -119,6 +119,7 @@ private:
     // Technically speaking, _lk holds a Client* and _client is a superfluous variable. That said,
     // LockedClients will likely be optimized away and the extra variable is a cheap price to pay
     // for better developer comprehension.
+    char padding[60];
     stdx::unique_lock<Client> _lk;
     Client* _client = nullptr;
 };
@@ -662,8 +663,6 @@ private:
      */
     void _delistOperation(OperationContext* opCtx) noexcept;
 
-    Mutex _mutex = MONGO_MAKE_LATCH(/*HierarchicalAcquisitionLevel(2), */ "ServiceContext::_mutex");
-
     /**
      * The periodic runner.
      */
@@ -714,17 +713,22 @@ private:
      */
     SyncUnique<ClockSource> _preciseClockSource;
 
-    // Flag set to indicate that all operations are to be interrupted ASAP.
-    AtomicWord<bool> _globalKill{false};
-
     // protected by _mutex
     std::vector<KillOpListenerInterface*> _killOpListeners;
 
-    // When the catalog is restarted, the generation goes up by one each time.
-    AtomicWord<uint64_t> _catalogGeneration{0};
-
     bool _startupComplete = false;
     stdx::condition_variable _startupCompleteCondVar;
+
+    // When the catalog is restarted, the generation goes up by one each time.
+    char padding0[60];
+    AtomicWord<uint64_t> _catalogGeneration{0};
+
+    // Flag set to indicate that all operations are to be interrupted ASAP.
+    char padding1[60];
+    AtomicWord<bool> _globalKill{false};
+
+    char padding2[60];
+    Mutex _mutex = MONGO_MAKE_LATCH(/*HierarchicalAcquisitionLevel(2), */ "ServiceContext::_mutex");
 };
 
 /**
