@@ -44,6 +44,7 @@
 #include "mongo/util/debug_util.h"
 #include "mongo/util/scopeguard.h"
 #include "mongo/util/thread_safety_context.h"
+#include <sched.h>
 
 #if !defined(_WIN32)
 #include <sys/resource.h>
@@ -59,6 +60,14 @@ namespace mongo {
 
 namespace {
 void* runFunc(void* ctx) {
+    pthread_t tid = pthread_self();
+    int cpuid = sched_getcpu();
+
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(cpuid, &cpuset);
+    sched_setaffinity(0, sizeof(cpuset), &cpuset);
+
     auto taskPtr =
         std::unique_ptr<unique_function<void()>>(static_cast<unique_function<void()>*>(ctx));
     (*taskPtr)();
